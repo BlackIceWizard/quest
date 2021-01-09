@@ -26,3 +26,6 @@
 
 # General
 /tmp/
+/.env
+/symfony
+/docker-compose.override.yml
