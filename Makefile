@@ -4,11 +4,12 @@ COMPOSE_PROJECT_NAME = 'telegram-quest'
 
 DOCKER_COMPOSE ?= docker-compose
 RUN_PHP ?= $(DOCKER_COMPOSE) run --rm --no-deps php
+EXEC_PHP ?= $(DOCKER_COMPOSE) exec php
 RUN_COMPOSER = $(RUN_PHP) composer
 
 EXECUTE_DB ?= $(DOCKER_COMPOSE) exec postgres
 
-all: docker-compose.override.yml symfony-cli-install composer-install up cc
+all: docker-compose.override.yml composer-install up cc
 .PHONY: all
 
 #
@@ -20,13 +21,6 @@ docker-compose.override.yml:
 envfile:
 	$(RUN_PHP) cat .env.dist > .env
 .PHONY: envfile
-
-symfony-cli-install:
-	$(RUN_PHP) wget https://get.symfony.com/cli/installer -O tmp/symfony
-	$(RUN_PHP) chmod +x tmp/symfony
-	$(RUN_PHP) tmp/symfony --install-dir=./
-	$(RUN_PHP) rm tmp/symfony
-.PHONY: symfony-cli-install
 
 cc:
 #	$(RUN_PHP) rm -rf \
@@ -53,12 +47,16 @@ cc:
 .PHONY: cc
 
 check-requirements:
-	$(RUN_PHP) ./symfony check:requirements
+	$(RUN_PHP) symfony check:requirements
 .PHONY: check-requirements
 
 #
 # Utils
 #
+php-rebuild:
+	$(DOCKER_COMPOSE) build --no-cache --pull --force-rm php
+.PHONY: php-rebuild
+
 remove-all-images:
 	docker rmi $$(docker images -q) --force
 .PHONY: remove-all-images
@@ -68,7 +66,7 @@ psql:
 .PHONY: psql
 
 ssh:
-	$(EXECUTE_PHP) sh
+	$(EXEC_PHP) sh
 .PHONY: ssh
 
 #

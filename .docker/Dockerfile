@@ -29,3 +29,8 @@ RUN docker-php-ext-install -j$(nproc) opcache
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 RUN php -r "unlink('composer-setup.php');"
+
+RUN wget https://get.symfony.com/cli/installer -O ./symfony
+RUN chmod +x ./symfony
+RUN ./symfony --install-dir=/usr/local/bin
+RUN rm ./symfony
