@@ -8,15 +8,17 @@ EXEC_PHP ?= $(DOCKER_COMPOSE) exec php
 RUN_COMPOSER = $(RUN_PHP) composer
 
 EXECUTE_DB ?= $(DOCKER_COMPOSE) exec postgres
+ENVSUBST = \
+	USER_ID=`id -u ${USER}` envsubst
 
-all: docker-compose.override.yml composer-install up cc
+all: composer-install up cc
 .PHONY: all
 
 #
 # Setup
 #
 docker-compose.override.yml:
-	cp -v docker-compose.override.yml.dist docker-compose.override.yml
+	$(ENVSUBST) < docker-compose.override.yml.dist > docker-compose.override.yml
 
 env-file:
 	$(RUN_PHP) [ -f .env.local ] && echo ".env.local already exists" || touch .env.local
@@ -24,27 +26,8 @@ env-file:
 .PHONY: env-file
 
 cc:
-#	$(RUN_PHP) rm -rf \
-#		data/cache/DoctrineModule/cache/* \
-#		data/cache/DoctrineORMModule/Proxy/* \
-#		data/cache/exchange-rates/*/* \
-#		data/cache/jms/*/* \
-#		data/cache/translation/*/* \
-#		data/cache/autowire/*/* \
-#		data/cache/annotations/symfony-validator/*.validatorcache.data
-#	$(RUN_PHP) mkdir -p \
-#		data/cache/DoctrineModule/cache/ \
-#		data/cache/DoctrineORMModule/Proxy/ \
-#		data/cache/exchange-rates/ \
-#		data/cache/jms/ \
-#		data/cache/translation/ \
-#		data/cache/autowire/ \
-#		data/cache/annotations/symfony-validator/
-#	$(RUN_PHP) ./doctrine -q orm:clear-cache:metadata --flush
-#	$(RUN_PHP) ./doctrine -q orm:clear-cache:query --flush
-#	$(RUN_PHP) ./doctrine -q orm:clear-cache:result --flush
-#	$(RUN_PHP) ./doctrine orm:generate-proxies
-#	$(RUN_PHP) ./zf reinfi:di cache warmup
+	$(RUN_PHP) rm -rf var/cache
+	$(RUN_PHP) bin/console cache:warmup
 .PHONY: cc
 
 check-requirements:

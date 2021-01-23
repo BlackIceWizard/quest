@@ -10,6 +10,14 @@ Create `.env` and .env.local files:
 $ make envfile
 ```
 
+
+Create `docker-compose.override.yml` file:
+
+```bash
+$ make docker-compose.override.yml
+```
+
+
 Build, run and install:
 
 ```bash

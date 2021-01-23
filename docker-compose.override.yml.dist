@@ -1,6 +1,7 @@
 version: '3'
 services:
-  php: ~
+  php:
+    user: "$USER_ID"
   web: ~
   postgres: ~
 
