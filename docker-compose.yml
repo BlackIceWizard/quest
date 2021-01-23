@@ -18,14 +18,17 @@ services:
             - ./.docker/conf/php/php.ini:/usr/local/etc/php/conf.d/php.ini
 #            - ./.docker/conf/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
             - .:/var/www/html
+        user: www-data
+        env_file:
+            - .env
+            - .env.local
     postgres:
         image: postgres:10.1
         restart: always
-        environment:
-            - POSTGRES_DB=${DB_NAME}
-            - POSTGRES_USER=${DB_USER}
-            - POSTGRES_PASSWORD=${DB_PASSWORD}
         ports:
             - 5432:5432
         volumes:
             - ./.docker/conf/postgres/:/docker-entrypoint-initdb.d/
+        env_file:
+            - .env
+            - .env.local

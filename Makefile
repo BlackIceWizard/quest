@@ -18,9 +18,10 @@ all: docker-compose.override.yml composer-install up cc
 docker-compose.override.yml:
 	cp -v docker-compose.override.yml.dist docker-compose.override.yml
 
-envfile:
+env-file:
+	$(RUN_PHP) [ -f .env.local ] && echo ".env.local already exists" || touch .env.local
 	$(RUN_PHP) cat .env.dist > .env
-.PHONY: envfile
+.PHONY: env-file
 
 cc:
 #	$(RUN_PHP) rm -rf \
@@ -62,7 +63,7 @@ remove-all-images:
 .PHONY: remove-all-images
 
 psql:
-	$(EXECUTE_DB) psql -U $(DB_USER) -d $(DB_NAME)
+	$(EXECUTE_DB) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 .PHONY: psql
 
 ssh:
@@ -121,7 +122,7 @@ db-recreate: db-clean
 
 db-export:
 	$(eval DATE_TAG:=$(shell date +'%Y_%m_%d-%H%M%S'))
-	$(EXECUTE_DB) pg_dump -n public -Fc -U $(DB_USER) -v -O -x -f /tmp/$(COMPOSE_PROJECT_NAME)_$(DATE_TAG).dump $(DB_NAME)
+	$(EXECUTE_DB) pg_dump -n public -Fc -U $(DBPOSTGRES__USER) -v -O -x -f /tmp/$(COMPOSE_PROJECT_NAME)_$(DATE_TAG).dump $(POSTGRES_DB)
 .PHONY: db-export
 
 db-migrate:
@@ -164,7 +165,7 @@ composer-update-lock:
 .PHONY: composer-update-lock
 
 composer-install:
-	#$(RUN_COMPOSER) install
+	$(RUN_COMPOSER) install
 .PHONY: composer-install
 
 composer-update:

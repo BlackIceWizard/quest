@@ -1,13 +1,11 @@
 #IDE
 .idea/
 
-# Cache, session files and logs (Symfony3)
-/var/cache/*
-/var/logs/*
-/var/sessions/*
-!var/cache/.gitkeep
-!var/logs/.gitkeep
-!var/sessions/.gitkeep
+# Cache, session files and logs (Symfony)
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+
 
 # Logs (Symfony4)
 /var/log/*
@@ -21,11 +19,9 @@
 !bin/symfony_requirements
 /vendor/
 
-# Embedded web-server pid file
-/.web-server-pid
-
-# General
-/tmp/
+# Local configs
 /.env
 /.env.local
+/.env.local.php
+/.env.*.local
 /docker-compose.override.yml
