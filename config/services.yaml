@@ -13,16 +13,36 @@ services:
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
-    RiverRing\TelegramQuest\:
+    RiverRing\Quest\:
         resource: '../src/'
         exclude:
             - '../src/Bridge/Symfony/Kernel.php'
+            - '../src/Domain/Model/'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
-    RiverRing\TelegramQuest\Bridge\Symfony\Controller\:
+    RiverRing\Quest\Bridge\Symfony\Controller\:
         resource: '../src/Bridge/Symfony/Controller/'
         tags: ['controller.service_arguments']
+
+    RiverRing\Quest\Infrastructure\Database\PdoProvider:
+        arguments:
+            $host: '%env(resolve:POSTGRES_HOST)%'
+            $port: '%env(resolve:POSTGRES_PORT)%'
+            $db: '%env(resolve:POSTGRES_DB)%'
+            $user: '%env(resolve:POSTGRES_USER)%'
+            $pass: '%env(resolve:POSTGRES_PASSWORD)%'
+
+    _instanceof:
+        RiverRing\Quest\Infrastructure\Database\Hydration\Hydrant\Hydrant:
+            tags: [ 'app.hydrants' ]
+
+    RiverRing\Quest\Infrastructure\Database\Repository\QuestRepository:
+        public: true
+
+    RiverRing\Quest\Infrastructure\Database\Hydration\Hydrant\HydrantRegistry:
+        arguments:
+            $hydrants: !tagged_iterator 'app.hydrants'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

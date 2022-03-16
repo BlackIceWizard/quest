@@ -15,7 +15,7 @@ services:
         build: .docker
         restart: always
         volumes:
-            - ./.docker/conf/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+#            - ./.docker/conf/php/php.ini:/usr/local/etc/php/conf.d/php.ini
 #            - ./.docker/conf/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
             - .:/var/www/html
         user: www-data
@@ -29,6 +29,10 @@ services:
             - 5432:5432
         volumes:
             - ./.docker/conf/postgres/:/docker-entrypoint-initdb.d/
+        environment:
+            POSTGRES_DB: tq
+            POSTGRES_USER: dev
+            POSTGRES_PASSWORD: dev
         env_file:
             - .env
             - .env.local

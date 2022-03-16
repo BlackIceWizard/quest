@@ -33,3 +33,5 @@ $ make ssh
 Launch API documentation:
 
 // In progress
+
+Library for graph visualization: https://docs.jsplumbtoolkit.com/community/lib/basic-concepts

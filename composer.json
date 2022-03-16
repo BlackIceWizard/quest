@@ -7,29 +7,34 @@
         "php": ">=8",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-pdo": "*",
+        "ramsey/uuid": "^4.2",
         "symfony/console": "5.2.*",
         "symfony/dotenv": "5.2.*",
+        "symfony/expression-language": "5.2.*",
         "symfony/flex": "^1.3.1",
         "symfony/framework-bundle": "5.2.*",
+        "symfony/serializer": "5.2.*",
         "symfony/yaml": "5.2.*"
-    },
-    "require-dev": {
     },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": {
             "*": "dist"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/flex": true
+        }
     },
     "autoload": {
         "psr-4": {
-            "RiverRing\\TelegramQuest\\": "src/"
+            "RiverRing\\Quest\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "RiverRing\\TelegramQuest\\Tests\\": "tests/"
+            "RiverRing\\Quest\\Tests\\": "tests/"
         }
     },
     "replace": {

@@ -1,6 +1,6 @@
 <?php
 
-namespace RiverRing\TelegramQuest\Bridge\Symfony;
+namespace RiverRing\Quest\Bridge\Symfony;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;

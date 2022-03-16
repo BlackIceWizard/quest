@@ -27,7 +27,7 @@ env-file:
 
 cc:
 	$(RUN_PHP) rm -rf var/cache
-	$(RUN_PHP) bin/console cache:warmup
+	$(RUN_PHP) php bin/console cache:warmup
 .PHONY: cc
 
 check-requirements:
