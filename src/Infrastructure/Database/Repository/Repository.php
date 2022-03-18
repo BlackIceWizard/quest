@@ -3,28 +3,34 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Repository;
 
-use Closure;
 use Iterator;
 use PDO;
-use ReflectionClass;
-use ReflectionException;
-use RiverRing\Quest\Infrastructure\Database\Hydration\Hydrant\HydrantRegistry;
+use RiverRing\Quest\Domain\AggregateRootId;
+use RiverRing\Quest\Infrastructure\Database\Aggregator;
 use RiverRing\Quest\Infrastructure\Database\PdoProvider;
 
+/**
+ * @template T
+ */
 abstract class Repository
 {
     protected PDO $pdo;
+    private Aggregator $aggregator;
 
-    /** @var ReflectionClass[] */
-    private array $classReflectors = [];
-
-    private HydrantRegistry $hydrants;
-
-    public function __construct(PdoProvider $pdoProvider, HydrantRegistry $hydrants)
+    public function __construct(PdoProvider $pdoProvider, Aggregator $aggregator)
     {
         $this->pdo = $pdoProvider->provide();
-        $this->hydrants = $hydrants;
+        $this->aggregator = $aggregator;
     }
+
+    /**
+     * @return class-string<T>
+     */
+    abstract protected function aggregateRootClass(): string;
+
+    abstract public function primaryKey(): PrimaryKeySpecification;
+
+    abstract protected function findEntities(AggregateRootId $id): array;
 
     protected function findOne($sql, $params = []): ?array
     {
@@ -46,53 +52,23 @@ abstract class Repository
         return $stmt->getIterator();
     }
 
-    private function reflectorByClassName(string $className): ReflectionClass
-    {
-        if (! isset($this->classReflectors[$className])) {
-            $this->classReflectors[$className] = new ReflectionClass($className);
-        }
-
-        return $this->classReflectors[$className];
-    }
-
     /**
-     * @template T
-     * @param class-string<T> $target
-     * @return ?T
-     *
-     * @throws ReflectionException
+     * @return T|null
      */
-    protected function hydrateOne(string $target, ?array $data): ?object
+    protected function aggregateOne(?array $data): ?object
     {
         if ($data === null) {
             return null;
         }
 
-        $reflector = $this->reflectorByClassName($target);
-        $object = $reflector->newInstanceWithoutConstructor();
-        $hydrant = $this->hydrants->byClassName($target);
+        $primaryKeySpecification = $this->primaryKey();
 
-        Closure::bind($hydrant->toClosure(), $object, $object)($data);
+        $entities = $this->findEntities(
+            $primaryKeySpecification->className()::fromString(
+                $data[$primaryKeySpecification->fieldName()]
+            )
+        );
 
-        return $object;
-    }
-
-    /**
-     * @template T
-     * @param class-string<T> $target
-     * @return Iterator<T>
-     *
-     * @throws ReflectionException
-     */
-    protected function hydrateAll(string $target, Iterator $listData): Iterator
-    {
-        foreach ($listData as $itemData) {
-            yield $this->hydrateOne($target, $itemData);
-        }
-    }
-
-    protected function addHydrant(string $forClass, callable $hydrant)
-    {
-        $this->hydrants[$forClass] = $hydrant;
+        return $this->aggregator->aggregate($this->aggregateRootClass(), $data, $entities);
     }
 }

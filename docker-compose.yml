@@ -29,6 +29,7 @@ services:
             - 5432:5432
         volumes:
             - ./.docker/conf/postgres/:/docker-entrypoint-initdb.d/
+            - postgres-data-volume:/var/lib/postgresql/data
         environment:
             POSTGRES_DB: tq
             POSTGRES_USER: dev
@@ -36,3 +37,7 @@ services:
         env_file:
             - .env
             - .env.local
+            
+volumes:
+    postgres-data-volume: #> docker volume create --name postgres-data-volume -d local
+        external: true

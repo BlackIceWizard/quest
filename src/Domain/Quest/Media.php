@@ -5,30 +5,24 @@ namespace RiverRing\Quest\Domain\Quest;
 
 use DateTimeImmutable;
 use Ramsey\Uuid\UuidInterface;
+use RiverRing\Quest\Domain\File;
 
-class Quest
+class Media
 {
-    private QuestId $id;
-
+    private UuidInterface $id;
     private string $name;
-
-    /** @var Media[] */
-    private array $media;
-
+    private File $file;
     private DateTimeImmutable $createdAt;
 
-    public function __construct(QuestId $id, string $name)
+    public function __construct(UuidInterface $id, string $name, File $file)
     {
         $this->id = $id;
         $this->name = $name;
+        $this->file = $file;
         $this->createdAt = new DateTimeImmutable();
     }
 
-    public function addMedia(Media... $media) {
-        array_push($this->media, ...$media);
-    }
-
-    public function id(): QuestId
+    public function id(): UuidInterface
     {
         return $this->id;
     }
@@ -36,6 +30,11 @@ class Quest
     public function name(): string
     {
         return $this->name;
+    }
+
+    public function file(): File
+    {
+        return $this->file;
     }
 
     public function createdAt(): DateTimeImmutable

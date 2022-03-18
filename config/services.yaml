@@ -34,15 +34,15 @@ services:
             $pass: '%env(resolve:POSTGRES_PASSWORD)%'
 
     _instanceof:
-        RiverRing\Quest\Infrastructure\Database\Hydration\Hydrant\Hydrant:
-            tags: [ 'app.hydrants' ]
+        RiverRing\Quest\Infrastructure\Database\Mapping\Mapper:
+            tags: [ 'app.mappers' ]
 
     RiverRing\Quest\Infrastructure\Database\Repository\QuestRepository:
         public: true
 
-    RiverRing\Quest\Infrastructure\Database\Hydration\Hydrant\HydrantRegistry:
+    RiverRing\Quest\Infrastructure\Database\Mapping\MapperRegistry:
         arguments:
-            $hydrants: !tagged_iterator 'app.hydrants'
+            $mappers: !tagged_iterator 'app.mappers'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

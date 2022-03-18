@@ -25,3 +25,6 @@
 /.env.local.php
 /.env.*.local
 /docker-compose.override.yml
+
+# Storage
+/.docker/storage

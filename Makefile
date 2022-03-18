@@ -28,6 +28,7 @@ env-file:
 cc:
 	$(RUN_PHP) rm -rf var/cache
 	$(RUN_PHP) php bin/console cache:warmup
+	$(RUN_COMPOSER) dump-autoload
 .PHONY: cc
 
 check-requirements:

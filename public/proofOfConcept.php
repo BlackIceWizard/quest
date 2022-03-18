@@ -2,6 +2,7 @@
 
 use Ramsey\Uuid\Uuid;
 use RiverRing\Quest\Bridge\Symfony\Kernel;
+use RiverRing\Quest\Domain\Quest\QuestId;
 use RiverRing\Quest\Infrastructure\Database\Repository\QuestRepository;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\ErrorHandler\Debug;
@@ -21,5 +22,5 @@ $kernel->boot();
 
 /** @var QuestRepository $quests */
 $quests = $kernel->getContainer()->get(QuestRepository::class);
-$quest = $quests->findById(Uuid::fromString('fbe2ea60-637d-4a4e-8a0a-3257a05ad146'));
+$quest = $quests->findById(QuestId::fromString('fbe2ea60-637d-4a4e-8a0a-3257a05ad146'));
 dump($quest);
