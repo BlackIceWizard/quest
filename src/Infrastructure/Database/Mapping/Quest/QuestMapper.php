@@ -8,21 +8,23 @@ use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
 use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractAggregateRootMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\PropertyType\DateTimeType;
+use RiverRing\Quest\Infrastructure\Database\Mapping\Property\DateTimeType;
 
-class QuestMapper extends AbstractAggregateRootMapper
+final class QuestMapper extends AbstractAggregateRootMapper
 {
-    /**
-     * @inheritDoc
-     */
     public function applicableFor(): string
     {
         return Quest::class;
     }
 
+    public function embeddable(): array
+    {
+        return [];
+    }
+
     public function hydrationClosure(): Closure
     {
-        return function (array $data, array $entities): void
+        return function (array $data, array $entities, array $embeddable): void
         {
             /** @var Quest $this */
             $this->id = QuestId::fromString($data['id']);

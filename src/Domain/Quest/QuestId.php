@@ -6,7 +6,7 @@ namespace RiverRing\Quest\Domain\Quest;
 use RiverRing\Quest\Domain\AggregateRootId;
 use RiverRing\Quest\Domain\AggregateRootIdTrait;
 
-class QuestId implements AggregateRootId
+final class QuestId implements AggregateRootId
 {
     use AggregateRootIdTrait;
 }

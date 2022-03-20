@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace RiverRing\Quest\Infrastructure\Database\Mapping\PropertyType;
+namespace RiverRing\Quest\Infrastructure\Database\Mapping\Property;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-class DateTimeType
+final class DateTimeType
 {
     static public function denormalize(?string $value): ?DateTimeImmutable
     {

@@ -6,7 +6,7 @@ namespace RiverRing\Quest\Infrastructure\Database;
 use PDO;
 use PDOException;
 
-class PdoProvider
+final class PdoProvider
 {
     private PDO $pdo;
 

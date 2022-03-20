@@ -7,30 +7,18 @@ use Closure;
 use ReflectionClass;
 use ReflectionException;
 
-abstract class AbstractAggregateRootMapper implements AggregateRootMapper
+abstract class AbstractAggregateRootMapper extends AbstractMapper implements AggregateRootMapper, EmbeddedAwareMapper
 {
-    private ?ReflectionClass $reflector = null;
-
-    private function initReflector(): ReflectionClass
-    {
-        if ($this->reflector === null) {
-            $this->reflector = new ReflectionClass($this->applicableFor());
-        }
-
-        return $this->reflector;
-    }
-
-
     /**
      * @throws ReflectionException
      */
-    public function map(array $data, array $entities): object
+    public function map(array $data, array $entities, array $embeddable): object
     {
         $object = $this
             ->initReflector()
             ->newInstanceWithoutConstructor();
 
-        Closure::bind($this->hydrationClosure(), $object, $object)($data, $entities);
+        Closure::bind($this->hydrationClosure(), $object, $object)($data, $entities, $embeddable);
 
         return $object;
     }

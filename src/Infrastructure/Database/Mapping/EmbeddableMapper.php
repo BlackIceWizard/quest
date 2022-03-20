@@ -5,7 +5,7 @@ namespace RiverRing\Quest\Infrastructure\Database\Mapping;
 
 use Closure;
 
-interface EntityMapper extends Mapper
+interface EmbeddableMapper extends Mapper
 {
-    public function map(array $data, array $embeddable): object;
+    public function map(array $data, string $prefix): object;
 }
