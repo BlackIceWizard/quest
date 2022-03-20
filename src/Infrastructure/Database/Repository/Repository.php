@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Infrastructure\Database\Repository;
 
 use Iterator;
+use JetBrains\PhpStorm\Pure;
 use PDO;
 use RiverRing\Quest\Domain\AggregateRootId;
 use RiverRing\Quest\Infrastructure\Database\Aggregator;
@@ -17,6 +18,7 @@ abstract class Repository
     protected PDO $pdo;
     private Aggregator $aggregator;
 
+    #[Pure]
     public function __construct(PdoProvider $pdoProvider, Aggregator $aggregator)
     {
         $this->pdo = $pdoProvider->provide();

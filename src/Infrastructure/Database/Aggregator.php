@@ -4,9 +4,6 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Infrastructure\Database;
 
 use Iterator;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractAggregateRootMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEmbeddableMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEntityMapper;
 use RiverRing\Quest\Infrastructure\Database\Mapping\Embeddable\EmbeddableSpecification;
 use RiverRing\Quest\Infrastructure\Database\Mapping\MapperRegistry;
 
@@ -40,7 +37,7 @@ final class Aggregator
         );
     }
 
-    protected function mapEntities(array $entitiesData): array
+    private function mapEntities(array $entitiesData): array
     {
         $hydrated = [];
         foreach ($entitiesData as $className => $entityData) {
@@ -49,7 +46,6 @@ final class Aggregator
                 continue;
             }
 
-            /** @var AbstractEntityMapper $mapper */
             $mapper = $this->mappers->entityMapper($className);
 
             if ($entityData instanceof Iterator) {

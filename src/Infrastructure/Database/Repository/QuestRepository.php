@@ -8,9 +8,8 @@ use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
 
-class QuestRepository extends Repository
+final class QuestRepository extends Repository
 {
-
     protected function aggregateRootClass(): string
     {
         return Quest::class;

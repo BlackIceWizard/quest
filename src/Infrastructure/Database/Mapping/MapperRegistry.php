@@ -6,7 +6,7 @@ namespace RiverRing\Quest\Infrastructure\Database\Mapping;
 use RuntimeException;
 use Symfony\Component\Routing\Exception\InvalidArgumentException;
 
-class MapperRegistry
+final class MapperRegistry
 {
     /** @var AggregateRootMapper[] */
     private array $aggregateRootMappers = [];
@@ -23,7 +23,7 @@ class MapperRegistry
     public function __construct(iterable $mappers)
     {
         foreach ($mappers as $mapper) {
-            switch(true){
+            switch (true) {
                 case $mapper instanceof AggregateRootMapper:
                     $this->aggregateRootMappers[$mapper->applicableFor()] = $mapper;
                     break;

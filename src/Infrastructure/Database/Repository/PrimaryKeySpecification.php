@@ -6,7 +6,7 @@ namespace RiverRing\Quest\Infrastructure\Database\Repository;
 use InvalidArgumentException;
 use RiverRing\Quest\Domain\AggregateRootId;
 
-class PrimaryKeySpecification
+final class PrimaryKeySpecification
 {
     private string $fieldName;
     private string $valueObjectClassName;
