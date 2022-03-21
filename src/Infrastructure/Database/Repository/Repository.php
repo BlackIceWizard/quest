@@ -4,35 +4,30 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Infrastructure\Database\Repository;
 
 use Iterator;
-use JetBrains\PhpStorm\Pure;
 use PDO;
-use RiverRing\Quest\Domain\AggregateRootId;
 use RiverRing\Quest\Infrastructure\Database\Aggregator;
 use RiverRing\Quest\Infrastructure\Database\PdoProvider;
+use RuntimeException;
 
 /**
  * @template T
+ * @method array findEntities(mixed $id)
  */
 abstract class Repository
 {
     protected PDO $pdo;
     private Aggregator $aggregator;
 
-    #[Pure]
     public function __construct(PdoProvider $pdoProvider, Aggregator $aggregator)
     {
         $this->pdo = $pdoProvider->provide();
         $this->aggregator = $aggregator;
+        if(!method_exists($this,'findEntities')) {
+            throw new RuntimeException('Each repository must contain an "findEntities" method with a protected access modifier.');
+        }
     }
 
-    /**
-     * @return class-string<T>
-     */
-    abstract protected function aggregateRootClass(): string;
-
-    abstract public function primaryKey(): PrimaryKeySpecification;
-
-    abstract protected function findEntities(AggregateRootId $id): array;
+    abstract protected function specification(): AggregateRootSpecification;
 
     protected function findOne($sql, $params = []): ?array
     {
@@ -63,14 +58,14 @@ abstract class Repository
             return null;
         }
 
-        $primaryKeySpecification = $this->primaryKey();
+        $aggregateRootSpecification = $this->specification();
 
         $entities = $this->findEntities(
-            $primaryKeySpecification->className()::fromString(
-                $data[$primaryKeySpecification->fieldName()]
+            $aggregateRootSpecification->aggregateRootIdFactory()(
+                $data[$aggregateRootSpecification->primaryKeyFieldName()]
             )
         );
 
-        return $this->aggregator->aggregate($this->aggregateRootClass(), $data, $entities);
+        return $this->aggregator->aggregate($aggregateRootSpecification->aggregateRootClassName(), $data, $entities);
     }
 }

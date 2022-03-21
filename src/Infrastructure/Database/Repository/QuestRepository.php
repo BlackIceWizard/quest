@@ -3,24 +3,23 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Repository;
 
-use RiverRing\Quest\Domain\AggregateRootId;
 use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
 
 final class QuestRepository extends Repository
 {
-    protected function aggregateRootClass(): string
+    protected function specification(): AggregateRootSpecification
     {
-        return Quest::class;
+        return new AggregateRootSpecification(
+            Quest::class,
+            'id',
+            fn (string $idValue) => QuestId::fromString($idValue)
+        );
     }
 
-    public function primaryKey(): PrimaryKeySpecification
+    protected function findEntities(QuestId $id): array
     {
-        return new PrimaryKeySpecification('id', QuestId::class);
-    }
-
-    protected function findEntities(AggregateRootId $id): array {
         return [
             Media::class =>
                 $this->find('SELECT * FROM quest_media where quest_id = :id', ['id' => $id->toString()]),
