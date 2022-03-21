@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Domain;
 
-final class File
+class File
 {
     private string $mimeType;
     private int $size;

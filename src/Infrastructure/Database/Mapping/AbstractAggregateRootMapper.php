@@ -9,14 +9,9 @@ use ReflectionException;
 
 abstract class AbstractAggregateRootMapper extends AbstractMapper implements AggregateRootMapper, EmbeddedAwareMapper
 {
-    /**
-     * @throws ReflectionException
-     */
     public function map(array $data, array $entities, array $embeddable): object
     {
-        $object = $this
-            ->initReflector()
-            ->newInstanceWithoutConstructor();
+        $object = $this->instantiateAugmentedObject($this->calculateStateHash($data));
 
         Closure::bind($this->hydrationClosure(), $object, $object)($data, $entities, $embeddable);
 

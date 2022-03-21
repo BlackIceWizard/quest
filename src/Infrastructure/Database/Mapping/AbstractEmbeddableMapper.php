@@ -9,9 +9,7 @@ abstract class AbstractEmbeddableMapper extends AbstractMapper implements Embedd
 {
     public function map(array $data, string $prefix): object
     {
-        $object = $this
-            ->initReflector()
-            ->newInstanceWithoutConstructor();
+        $object = $this->instantiateAugmentedObject($this->calculateStateHash($data));
 
         Closure::bind($this->hydrationClosure(), $object, $object)($data, $prefix);
 

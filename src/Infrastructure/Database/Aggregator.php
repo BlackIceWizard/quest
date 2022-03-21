@@ -94,7 +94,7 @@ final class Aggregator
         return $this->excludeFields(
             $data,
             ...array_map(
-                fn (EmbeddableSpecification $specification) => $specification->prefix(),
+                fn(EmbeddableSpecification $specification) => $specification->prefix(),
                 $specifications
             )
         );
@@ -115,7 +115,7 @@ final class Aggregator
         foreach ($keyPrefixes as $keyPrefix) {
             $data = array_filter(
                 $data,
-                fn (string $key) => str_starts_with($key, $keyPrefix) ? $contains : ! $contains,
+                fn(string $key) => str_starts_with($key, $keyPrefix) ? $contains : ! $contains,
                 ARRAY_FILTER_USE_KEY
             );
         }

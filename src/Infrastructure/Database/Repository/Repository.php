@@ -49,6 +49,12 @@ abstract class Repository
         return $stmt->getIterator();
     }
 
+    protected function execute($sql, $params = []): void
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+    }
+
     /**
      * @return T|null
      */
@@ -67,5 +73,10 @@ abstract class Repository
         );
 
         return $this->aggregator->aggregate($aggregateRootSpecification->aggregateRootClassName(), $data, $entities);
+    }
+
+    protected function dump(object $aggregateRoot): array
+    {
+
     }
 }

@@ -7,7 +7,7 @@ use DateTimeImmutable;
 use Ramsey\Uuid\UuidInterface;
 use RiverRing\Quest\Domain\File;
 
-final class Media
+class Media
 {
     private UuidInterface $id;
     private string $name;

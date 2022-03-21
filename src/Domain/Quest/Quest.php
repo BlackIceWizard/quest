@@ -6,7 +6,7 @@ namespace RiverRing\Quest\Domain\Quest;
 use DateTimeImmutable;
 use Ramsey\Uuid\UuidInterface;
 
-final class Quest
+class Quest
 {
     private QuestId $id;
 
