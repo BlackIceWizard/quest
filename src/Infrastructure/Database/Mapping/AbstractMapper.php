@@ -18,10 +18,13 @@ abstract class AbstractMapper implements Mapper
 
         eval(
             sprintf(
-                '$instance = new class (\'%s\') extends %s { use %s; };',
-                $stateHash,
+                '$instance = new class () extends %s implements %s {'
+                . 'public function __construct(){}'
+                . 'public function stateHash(): string { return \'%s\'; }'
+                . '};',
                 $objectClassName,
-                MetaDataTrait::class
+                Augmentation::class,
+                $stateHash
             )
         );
 

@@ -3,56 +3,39 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Repository;
 
+use InvalidArgumentException;
 use Iterator;
-use PDO;
 use RiverRing\Quest\Infrastructure\Database\Aggregator;
-use RiverRing\Quest\Infrastructure\Database\PdoProvider;
-use RuntimeException;
+use RiverRing\Quest\Infrastructure\Database\Dbal\Driver\Driver;
+use RiverRing\Quest\Infrastructure\Database\Repository\Specification\AggregateRootSpecification;
+use RiverRing\Quest\Infrastructure\Database\Repository\Specification\EntitySpecification;
+use RiverRing\Quest\Infrastructure\Database\Repository\Specification\PluralEntitySpecification;
+use RiverRing\Quest\Infrastructure\Database\Repository\Specification\SingleEntitySpecification;
 
 /**
  * @template T
- * @method array findEntities(mixed $id)
  */
 abstract class Repository
 {
-    protected PDO $pdo;
     private Aggregator $aggregator;
+    private Driver $driver;
 
-    public function __construct(PdoProvider $pdoProvider, Aggregator $aggregator)
+    public function __construct(Driver $driver, Aggregator $aggregator)
     {
-        $this->pdo = $pdoProvider->provide();
         $this->aggregator = $aggregator;
-        if(!method_exists($this,'findEntities')) {
-            throw new RuntimeException('Each repository must contain an "findEntities" method with a protected access modifier.');
-        }
+        $this->driver = $driver;
     }
 
     abstract protected function specification(): AggregateRootSpecification;
 
     protected function findOne($sql, $params = []): ?array
     {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-
-        if ($row = $stmt->fetch()) {
-            return $row;
-        }
-
-        return null;
+        return $this->driver->findOne($sql, $params);
     }
 
     protected function find($sql, $params = []): Iterator
     {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-
-        return $stmt->getIterator();
-    }
-
-    protected function execute($sql, $params = []): void
-    {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+        return $this->driver->find($sql, $params);
     }
 
     /**
@@ -67,16 +50,35 @@ abstract class Repository
         $aggregateRootSpecification = $this->specification();
 
         $entities = $this->findEntities(
-            $aggregateRootSpecification->aggregateRootIdFactory()(
-                $data[$aggregateRootSpecification->primaryKeyFieldName()]
-            )
+            $aggregateRootSpecification->entitySpecifications(),
+            $data[$aggregateRootSpecification->primaryKeyField()]
         );
 
-        return $this->aggregator->aggregate($aggregateRootSpecification->aggregateRootClassName(), $data, $entities);
+        return $this->aggregator->aggregate($aggregateRootSpecification->className(), $data, $entities);
     }
 
-    protected function dump(object $aggregateRoot): array
+    /**
+     * @param EntitySpecification[] $entitySpecifications
+     */
+    protected function findEntities(array $entitySpecifications, int|string $aggregateRootId): array
     {
+        $entities = [];
+        foreach ($entitySpecifications as $specification) {
+            $entities[$specification->className()] = match (true) {
+                $specification instanceof SingleEntitySpecification => $this->driver->findEntity(
+                    $aggregateRootId,
+                    $specification->tableName(),
+                    $specification->referencedField()
+                ),
+                $specification instanceof PluralEntitySpecification => $this->driver->findEntitySet(
+                    $aggregateRootId,
+                    $specification->tableName(),
+                    $specification->referencedField()
+                ),
+                default => throw new InvalidArgumentException(sprintf('Unexpected entity specification class %s', get_class($specification))),
+            };
+        }
 
+        return $entities;
     }
 }

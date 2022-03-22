@@ -44,5 +44,6 @@ services:
         arguments:
             $mappers: !tagged_iterator 'app.mappers'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    RiverRing\Quest\Infrastructure\Database\Dbal\Driver\PostgresDriver: ~
+
+    RiverRing\Quest\Infrastructure\Database\Dbal\Driver\Driver: '@RiverRing\Quest\Infrastructure\Database\Dbal\Driver\PostgresDriver'

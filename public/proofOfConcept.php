@@ -24,3 +24,4 @@ $kernel->boot();
 $quests = $kernel->getContainer()->get(QuestRepository::class);
 $quest = $quests->findById(QuestId::fromString('fbe2ea60-637d-4a4e-8a0a-3257a05ad146'));
 dump($quest);
+var_dump($quest);
