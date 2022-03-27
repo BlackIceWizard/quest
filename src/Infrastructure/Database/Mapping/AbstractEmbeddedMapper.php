@@ -5,13 +5,13 @@ namespace RiverRing\Quest\Infrastructure\Database\Mapping;
 
 use Closure;
 
-abstract class AbstractAggregateRootMapper implements PrimaryMapper
+abstract class AbstractEmbeddedMapper implements EmbeddedMapper
 {
     use MapperTrait;
 
-    public function hydrate(Extract $extract, string $stateHash): object
+    public function hydrate(Extract $extract): object
     {
-        $object = $this->instantiateAugmentedObject($stateHash);
+        $object = $this->instantiateAsIs();
 
         Closure::bind($this->hydrationClosure(), $object, $object)($extract);
 

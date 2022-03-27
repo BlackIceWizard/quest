@@ -68,6 +68,10 @@ class PostgresDriver implements Driver
         );
     }
 
+    public function store(array $data) {
+
+    }
+
     /*
      public function store(Quest $quest): void
     {

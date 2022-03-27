@@ -5,13 +5,15 @@ namespace RiverRing\Quest\Infrastructure\Database\Mapping;
 
 use Closure;
 
-abstract class AbstractEntityMapper extends AbstractMapper implements EntityMapper, EmbeddedAwareMapper
+abstract class AbstractEntityMapper implements PrimaryMapper
 {
-    public function map(array $data, array $embeddable): object
-    {
-        $object = $this->instantiateAugmentedObject($this->calculateStateHash($data));
+    use MapperTrait;
 
-        Closure::bind($this->hydrationClosure(), $object, $object)($data, $embeddable);
+    public function hydrate(Extract $extract, string $stateHash): object
+    {
+        $object = $this->instantiateAugmentedObject($stateHash);
+
+        Closure::bind($this->hydrationClosure(), $object, $object)($extract);
 
         return $object;
     }

@@ -7,6 +7,8 @@ use Closure;
 
 interface Mapper
 {
+    public function dehydrate(object $object): Extract;
+
     /**
      * @return class-string
      */

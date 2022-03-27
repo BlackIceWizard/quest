@@ -8,10 +8,10 @@ use JetBrains\PhpStorm\Pure;
 use Ramsey\Uuid\Uuid;
 use RiverRing\Quest\Domain\File;
 use RiverRing\Quest\Domain\Quest\Media;
-use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEntityMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\Embeddable\EmbeddableSpecification;
+use RiverRing\Quest\Infrastructure\Database\Mapping\Extract;
 use RiverRing\Quest\Infrastructure\Database\Mapping\Property\DateTimeType;
+use RiverRing\Quest\Infrastructure\Database\Specification\EmbeddableSpecification;
 
 final class MediaMapper extends AbstractEntityMapper
 {
@@ -32,9 +32,12 @@ final class MediaMapper extends AbstractEntityMapper
 
     public function hydrationClosure(): Closure
     {
-        return function (array $data, array $embeddable): void
-        {
+        return function (Extract $extract): void {
             /** @var Media $this */
+
+            $data = $extract->data();
+            $embeddable = $extract->embeddable();
+
             $this->id = Uuid::fromString($data['id']);
             $this->name = $data['name'];
             $this->file = $embeddable[MediaMapper::EMBEDDABLE_FILE];
@@ -44,14 +47,19 @@ final class MediaMapper extends AbstractEntityMapper
 
     public function dehydrationClosure(): Closure
     {
-        return function (): array
-        {
-            /** @var Quest $this */
-            return [
-                'id' => $this->id->toString(),
-                'name' => $this->name,
-                'created_at' => DatetimeType::normalize($this->createdAt),
-            ];
+        return function (): Extract {
+            /** @var Media $this */
+
+            return Extract::ofEntity(
+                [
+                    'id' => $this->id->toString(),
+                    'name' => $this->name,
+                    'created_at' => DatetimeType::normalize($this->createdAt),
+                ],
+                [
+                    MediaMapper::EMBEDDABLE_FILE => $this->file,
+                ]
+            );
         };
     }
 }

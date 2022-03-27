@@ -16,4 +16,6 @@ interface Driver
     public function findEntitySet(string|int $aggregateRootId, string $entityTable, string $referencedFieldName): Iterator;
 
     public function findEntity(string|int $aggregateRootId, string $entityTable, string $referencedFieldName): ?array;
+
+    public function store(array $data);
 }

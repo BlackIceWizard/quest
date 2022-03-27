@@ -5,9 +5,10 @@ namespace RiverRing\Quest\Infrastructure\Database\Mapping\Embeddable;
 
 use Closure;
 use RiverRing\Quest\Domain\File;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEmbeddableMapper;
+use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEmbeddedMapper;
+use RiverRing\Quest\Infrastructure\Database\Mapping\Extract;
 
-final class FileMapper extends AbstractEmbeddableMapper
+final class FileMapper extends AbstractEmbeddedMapper
 {
     public function applicableFor(): string
     {
@@ -16,17 +17,30 @@ final class FileMapper extends AbstractEmbeddableMapper
 
     public function hydrationClosure(): Closure
     {
-        return function (array $data, string $prefix): void
+        return function (Extract $extract): void
         {
             /** @var File $this */
-            $this->mimeType = $data[$prefix.'mime_type'];
-            $this->size = $data[$prefix.'size'];
-            $this->location = $data[$prefix.'location'];
+
+            $data = $extract->data();
+
+            $this->mimeType = $data['mime_type'];
+            $this->size = $data['size'];
+            $this->location = $data['location'];
         };
     }
 
     public function dehydrationClosure(): Closure
     {
-        // TODO: Implement dehydrationClosure() method.
+        return function (): Extract {
+            /** @var File $this */
+
+            return Extract::ofEmbeddable(
+                [
+                    'mime_type' => $this->mimeType,
+                    'size' => $this->size,
+                    'location' => $this->location,
+                ]
+            );
+        };
     }
 }

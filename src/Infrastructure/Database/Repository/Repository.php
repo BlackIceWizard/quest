@@ -7,23 +7,28 @@ use InvalidArgumentException;
 use Iterator;
 use RiverRing\Quest\Infrastructure\Database\Aggregator;
 use RiverRing\Quest\Infrastructure\Database\Dbal\Driver\Driver;
-use RiverRing\Quest\Infrastructure\Database\Repository\Specification\AggregateRootSpecification;
-use RiverRing\Quest\Infrastructure\Database\Repository\Specification\EntitySpecification;
-use RiverRing\Quest\Infrastructure\Database\Repository\Specification\PluralEntitySpecification;
-use RiverRing\Quest\Infrastructure\Database\Repository\Specification\SingleEntitySpecification;
+use RiverRing\Quest\Infrastructure\Database\Dumper;
+use RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation\RawData;
+use RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation\Record;
+use RiverRing\Quest\Infrastructure\Database\Specification\AggregateRootSpecification;
+use RiverRing\Quest\Infrastructure\Database\Specification\EntitySpecification;
+use RiverRing\Quest\Infrastructure\Database\Specification\PluralEntitySpecification;
+use RiverRing\Quest\Infrastructure\Database\Specification\SingleEntitySpecification;
 
 /**
  * @template T
  */
 abstract class Repository
 {
-    private Aggregator $aggregator;
     private Driver $driver;
+    private Aggregator $aggregator;
+    private Dumper $dumper;
 
-    public function __construct(Driver $driver, Aggregator $aggregator)
+    public function __construct(Driver $driver, Aggregator $aggregator, Dumper $dumper)
     {
-        $this->aggregator = $aggregator;
         $this->driver = $driver;
+        $this->aggregator = $aggregator;
+        $this->dumper = $dumper;
     }
 
     abstract protected function specification(): AggregateRootSpecification;
@@ -39,28 +44,9 @@ abstract class Repository
     }
 
     /**
-     * @return T|null
-     */
-    protected function aggregateOne(?array $data): ?object
-    {
-        if ($data === null) {
-            return null;
-        }
-
-        $aggregateRootSpecification = $this->specification();
-
-        $entities = $this->findEntities(
-            $aggregateRootSpecification->entitySpecifications(),
-            $data[$aggregateRootSpecification->primaryKeyField()]
-        );
-
-        return $this->aggregator->aggregate($aggregateRootSpecification->className(), $data, $entities);
-    }
-
-    /**
      * @param EntitySpecification[] $entitySpecifications
      */
-    protected function findEntities(array $entitySpecifications, int|string $aggregateRootId): array
+    private function findEntities(array $entitySpecifications, int|string $aggregateRootId): array
     {
         $entities = [];
         foreach ($entitySpecifications as $specification) {
@@ -80,5 +66,58 @@ abstract class Repository
         }
 
         return $entities;
+    }
+
+    /**
+     * @return T|null
+     */
+    protected function aggregateOne(?array $aggregateRootData): ?object
+    {
+        if ($aggregateRootData === null) {
+            return null;
+        }
+
+        $aggregateRootSpecification = $this->specification();
+
+        $entitiesData = $this->findEntities(
+            $aggregateRootSpecification->entitySpecifications(),
+            $aggregateRootData[$aggregateRootSpecification->primaryKeyField()]
+        );
+
+        $allData = [$aggregateRootSpecification->className() => $aggregateRootData] + $entitiesData;
+
+        return $this->aggregator->aggregate(
+            $aggregateRootSpecification,
+            new RawData(
+                array_combine(
+                    array_keys($allData),
+                    array_map(
+                        static function ($recordData) {
+                            if ($recordData === null) {
+                                return null;
+                            }
+
+                            if ($recordData instanceof Iterator) {
+                                return array_map(
+                                    fn($data): Record => Record::justLoaded($data),
+                                    iterator_to_array($recordData)
+                                );
+                            }
+
+                            return Record::justLoaded($recordData);
+                        },
+                        $allData
+                    )
+                )
+            )
+        );
+    }
+
+
+    public function store(object $aggregateRoot): void
+    {
+        $data = $this->dumper->dump($this->specification(), $aggregateRoot);
+
+        $this->driver->store($data);
     }
 }

@@ -8,13 +8,13 @@ use Symfony\Component\Routing\Exception\InvalidArgumentException;
 
 final class MapperRegistry
 {
-    /** @var AggregateRootMapper[] */
+    /** @var AbstractAggregateRootMapper[] */
     private array $aggregateRootMappers = [];
 
-    /** @var EntityMapper[] */
+    /** @var AbstractEntityMapper[] */
     private array $entityMappers = [];
 
-    /** @var EmbeddableMapper[] */
+    /** @var AbstractEmbeddedMapper[] */
     private array $embeddedMappers = [];
 
     /**
@@ -24,13 +24,13 @@ final class MapperRegistry
     {
         foreach ($mappers as $mapper) {
             switch (true) {
-                case $mapper instanceof AggregateRootMapper:
+                case $mapper instanceof AbstractAggregateRootMapper:
                     $this->aggregateRootMappers[$mapper->applicableFor()] = $mapper;
                     break;
-                case $mapper instanceof EntityMapper:
+                case $mapper instanceof AbstractEntityMapper:
                     $this->entityMappers[$mapper->applicableFor()] = $mapper;
                     break;
-                case $mapper instanceof EmbeddableMapper:
+                case $mapper instanceof AbstractEmbeddedMapper:
                     $this->embeddedMappers[$mapper->applicableFor()] = $mapper;
                     break;
                 default:
@@ -42,7 +42,7 @@ final class MapperRegistry
     /**
      * @param class-string $className
      */
-    public function aggregateRootMapper(string $className): AggregateRootMapper
+    public function aggregateRootMapper(string $className): AbstractAggregateRootMapper
     {
         if (! isset($this->aggregateRootMappers[$className])) {
             throw new RuntimeException(sprintf('No aggregate root mapper registered for class %s', $className));
@@ -54,7 +54,7 @@ final class MapperRegistry
     /**
      * @param class-string $className
      */
-    public function entityMapper(string $className): EntityMapper
+    public function entityMapper(string $className): AbstractEntityMapper
     {
         if (! isset($this->entityMappers[$className])) {
             throw new RuntimeException(sprintf('No entity mapper registered for class %s', $className));
@@ -66,7 +66,7 @@ final class MapperRegistry
     /**
      * @param class-string $className
      */
-    public function embeddedMapper(string $className): EmbeddableMapper
+    public function embeddedMapper(string $className): AbstractEmbeddedMapper
     {
         if (! isset($this->embeddedMappers[$className])) {
             throw new RuntimeException(sprintf('No embedded mapper registered for class %s', $className));

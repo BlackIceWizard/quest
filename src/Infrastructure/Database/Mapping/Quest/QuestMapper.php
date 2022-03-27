@@ -8,6 +8,7 @@ use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
 use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractAggregateRootMapper;
+use RiverRing\Quest\Infrastructure\Database\Mapping\Extract;
 use RiverRing\Quest\Infrastructure\Database\Mapping\Property\DateTimeType;
 
 final class QuestMapper extends AbstractAggregateRootMapper
@@ -24,9 +25,12 @@ final class QuestMapper extends AbstractAggregateRootMapper
 
     public function hydrationClosure(): Closure
     {
-        return function (array $data, array $entities, array $embeddable): void
-        {
+        return function (Extract $extract): void {
             /** @var Quest $this */
+
+            $data = $extract->data();
+            $entities = $extract->entities();
+
             $this->id = QuestId::fromString($data['id']);
             $this->name = $data['name'];
             $this->media = $entities[Media::class];
@@ -36,14 +40,18 @@ final class QuestMapper extends AbstractAggregateRootMapper
 
     public function dehydrationClosure(): Closure
     {
-        return function (): array
-        {
+        return function (): Extract {
             /** @var Quest $this */
-            return [
-                'id' => $this->id->toString(),
-                'name' => $this->name,
-                'created_at' => DatetimeType::normalize($this->createdAt),
-            ];
+            return Extract::ofAggregateRoot(
+                [
+                    'id' => $this->id->toString(),
+                    'name' => $this->name,
+                    'created_at' => DatetimeType::normalize($this->createdAt),
+                ],
+                [
+                    Media::class => $this->media,
+                ]
+            );
         };
     }
 }

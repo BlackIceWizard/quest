@@ -7,21 +7,17 @@ use JetBrains\PhpStorm\Pure;
 use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
-use RiverRing\Quest\Infrastructure\Database\Repository\Specification\AggregateRootSpecification;
-use RiverRing\Quest\Infrastructure\Database\Repository\Specification\PluralEntitySpecification;
+use RiverRing\Quest\Infrastructure\Database\Specification\AggregateRootSpecification;
+use RiverRing\Quest\Infrastructure\Database\Specification\PluralEntitySpecification;
 
 final class QuestRepository extends Repository
 {
     #[Pure]
     protected function specification(): AggregateRootSpecification
     {
-        return new AggregateRootSpecification(
-            Quest::class,
-            'id',
-            [
-                new PluralEntitySpecification(Media::class, 'quest_media', 'quest_id'),
-            ]
-        );
+        return new AggregateRootSpecification(Quest::class, 'quests', 'id', [
+            new PluralEntitySpecification(Media::class, 'quest_media', 'quest_id'),
+        ]);
     }
 
     public function findById(QuestId $id): ?Quest

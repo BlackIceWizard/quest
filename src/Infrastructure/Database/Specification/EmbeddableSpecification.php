@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace RiverRing\Quest\Infrastructure\Database\Mapping\Embeddable;
+namespace RiverRing\Quest\Infrastructure\Database\Specification;
 
 final class EmbeddableSpecification
 {
