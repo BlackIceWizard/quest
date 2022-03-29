@@ -3,37 +3,38 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation;
 
-use JetBrains\PhpStorm\Pure;
-
 class Record
 {
     private RecordStatus $status;
     private array $data;
-    private string $stateHash;
+    private ?string $hash;
 
-    public function __construct(RecordStatus $status, array $data)
+    private function __construct(RecordStatus $status, array $data, ?string $hash)
     {
         $this->status = $status;
         $this->data = $data;
-        $this->stateHash = $this->calculateStateHash();
+        $this->hash = $hash;
     }
 
-    #[Pure]
     public static function justLoaded(array $data): self
     {
-        return new self(RecordStatus::JustLoaded, $data);
+        return new self(RecordStatus::JustLoaded, $data, self::calculateHash($data));
     }
 
-    #[Pure]
-    public static function changed(array $data): self
+    public static function previouslyLoaded(array $data, string $originalHash): self
     {
-        return new self(RecordStatus::Changed, $data);
+        $newHash = self::calculateHash($data);
+
+        if ($originalHash === $newHash) {
+            return new self(RecordStatus::NotChanged, $data, $originalHash);
+        }
+
+        return new self(RecordStatus::Changed, $data, $newHash);
     }
 
-    #[Pure]
-    public static function notChanged(array $data): self
+    public static function new(array $data): self
     {
-        return new self(RecordStatus::NotChanged, $data);
+        return new self(RecordStatus::New, $data, null);
     }
 
     public function status(): RecordStatus
@@ -46,15 +47,15 @@ class Record
         return $this->data;
     }
 
-    public function stateHash(): string
+    public function hash(): string
     {
-        return $this->stateHash;
+        return $this->hash;
     }
 
-    private function calculateStateHash(): string
+    private static function calculateHash(array $data): string
     {
-        ksort($this->data);
+        ksort($data);
 
-        return md5(json_encode($this->data));
+        return md5(json_encode($data));
     }
 }

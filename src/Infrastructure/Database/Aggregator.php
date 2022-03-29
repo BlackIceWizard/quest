@@ -42,7 +42,7 @@ final class Aggregator
                     $aggregateRootMapper->embeddable()
                 )
             ),
-            $aggregateRootRecord->stateHash()
+            $aggregateRootRecord->hash()
         );
     }
 
@@ -58,8 +58,8 @@ final class Aggregator
             $mapper = $this->mappers->entityMapper($className);
 
             $hydrated[$className] = match (true) {
-                $specification instanceof SingleEntitySpecification => $this->hydrateSingleEntity($mapper, $rawData->byClassname($className)),
-                $specification instanceof PluralEntitySpecification => $this->hydrateMultipleEntities($mapper, $rawData->byClassname($className)),
+                $specification instanceof SingleEntitySpecification => $this->hydrateSingleEntity($mapper, $rawData->byClassname($className), $specification),
+                $specification instanceof PluralEntitySpecification => $this->hydrateMultipleEntities($mapper, $rawData->byClassname($className), $specification),
                 default => throw new InvalidArgumentException(sprintf('Unexpected entity specification class %s', get_class($specification))),
             };
         }
@@ -67,40 +67,40 @@ final class Aggregator
         return $hydrated;
     }
 
-    private function hydrateSingleEntity(PrimaryMapper $mapper, ?Record $record): ?object
+    private function hydrateSingleEntity(PrimaryMapper $mapper, ?Record $record, SingleEntitySpecification $specification): ?object
     {
         if ($record === null) {
             return null;
         }
 
-        $recordData = $record->data();
-        return $mapper->hydrate(
-            Extract::ofEntity(
-                $this->excludeEmbeddableFields($recordData, $mapper->embeddable()),
-                $this->hydrateEmbeddable($recordData, $mapper->embeddable())
-            ),
-            $record->stateHash()
-        );
+        return $this->hydrateEntity($record, $mapper, $specification);
     }
 
     /**
      * @param Record[] $records
      * @return object[]
      */
-    private function hydrateMultipleEntities(PrimaryMapper $mapper, array $records): array
+    private function hydrateMultipleEntities(PrimaryMapper $mapper, array $records, PluralEntitySpecification $specification): array
     {
         return array_map(
-            function (Record $record) use ($mapper): object {
-                $recordData = $record->data();
-                return $mapper->hydrate(
-                    Extract::ofEntity(
-                        $this->excludeEmbeddableFields($recordData, $mapper->embeddable()),
-                        $this->hydrateEmbeddable($recordData, $mapper->embeddable())
-                    ),
-                    $record->stateHash()
-                );
-            },
+            fn(Record $record): object => $this->hydrateEntity($record, $mapper, $specification),
             $records
+        );
+    }
+
+    private function hydrateEntity(Record $record, PrimaryMapper $mapper, EntitySpecification $specification): object
+    {
+        $recordData = $record->data();
+
+        return $mapper->hydrate(
+            Extract::ofEntity(
+                $this->excludeFields(
+                    $this->excludeEmbeddableFields($recordData, $mapper->embeddable()),
+                    $specification->referencedField()
+                ),
+                $this->hydrateEmbeddable($recordData, $mapper->embeddable())
+            ),
+            $record->hash()
         );
     }
 
@@ -112,11 +112,11 @@ final class Aggregator
         $embeddable = [];
 
         foreach ($specifications as $key => $specification) {
-            $mapper = $this->mappers->embeddedMapper($specification->class());
+            $mapper = $this->mappers->embeddedMapper($specification->className());
             $embeddable[$key] = $mapper->hydrate(
                 Extract::ofEmbeddable(
                     $this->removeDataKeyPrefix(
-                        $this->filterDataByPrefix($data, $specification->prefix()),
+                        $this->excludeFieldsWithoutPrefix($data, $specification->prefix()),
                         $specification->prefix()
                     )
                 )
@@ -126,12 +126,21 @@ final class Aggregator
         return $embeddable;
     }
 
+    private function excludeFields(array $data, string ...$names): array
+    {
+        return array_filter(
+            $data,
+            fn(string $key): bool => ! in_array($key, $names),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
     /**
      * @param EmbeddableSpecification[] $specifications
      */
     private function excludeNotEmbeddableFields(array $specifications, array $data): array
     {
-        return $this->filterDataByPrefix(
+        return $this->excludeFieldsWithoutPrefix(
             $data,
             ...array_map(
                 fn(EmbeddableSpecification $specification) => $specification->prefix(),
@@ -165,7 +174,7 @@ final class Aggregator
         );
     }
 
-    private function filterDataByPrefix(array $data, ...$prefixes): array
+    private function excludeFieldsWithoutPrefix(array $data, ...$prefixes): array
     {
         return $this->filterData($data, $prefixes, true);
     }
@@ -180,7 +189,7 @@ final class Aggregator
         foreach ($keyPrefixes as $keyPrefix) {
             $data = array_filter(
                 $data,
-                fn(string $key) => str_starts_with($key, $keyPrefix) ? $contains : ! $contains,
+                fn(string $key): bool => str_starts_with($key, $keyPrefix) ? $contains : ! $contains,
                 ARRAY_FILTER_USE_KEY
             );
         }

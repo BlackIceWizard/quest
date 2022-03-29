@@ -8,6 +8,7 @@ use Iterator;
 use RiverRing\Quest\Infrastructure\Database\Aggregator;
 use RiverRing\Quest\Infrastructure\Database\Dbal\Driver\Driver;
 use RiverRing\Quest\Infrastructure\Database\Dumper;
+use RiverRing\Quest\Infrastructure\Database\Mapping\MapperRegistry;
 use RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation\RawData;
 use RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation\Record;
 use RiverRing\Quest\Infrastructure\Database\Specification\AggregateRootSpecification;
@@ -24,11 +25,11 @@ abstract class Repository
     private Aggregator $aggregator;
     private Dumper $dumper;
 
-    public function __construct(Driver $driver, Aggregator $aggregator, Dumper $dumper)
+    public function __construct(Driver $driver, MapperRegistry $mappers)
     {
         $this->driver = $driver;
-        $this->aggregator = $aggregator;
-        $this->dumper = $dumper;
+        $this->aggregator = new Aggregator($mappers);
+        $this->dumper = new Dumper($mappers);
     }
 
     abstract protected function specification(): AggregateRootSpecification;
@@ -116,8 +117,11 @@ abstract class Repository
 
     public function store(object $aggregateRoot): void
     {
-        $data = $this->dumper->dump($this->specification(), $aggregateRoot);
+        $rawData = $this->dumper->dump($this->specification(), $aggregateRoot);
 
-        $this->driver->store($data);
+        var_export($rawData);
+        exit;
+
+        $this->driver->store($rawData);
     }
 }

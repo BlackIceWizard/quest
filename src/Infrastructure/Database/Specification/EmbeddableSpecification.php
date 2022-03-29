@@ -5,21 +5,21 @@ namespace RiverRing\Quest\Infrastructure\Database\Specification;
 
 final class EmbeddableSpecification
 {
-    private string $class;
+    private string $className;
     private string $prefix;
 
     /**
-     * @param class-string $class
+     * @param class-string $className
      */
-    public function __construct(string $class, string $prefix)
+    public function __construct(string $className, string $prefix)
     {
-        $this->class = $class;
+        $this->className = $className;
         $this->prefix = $prefix;
     }
 
-    public function class(): string
+    public function className(): string
     {
-        return $this->class;
+        return $this->className;
     }
 
     public function prefix(): string

@@ -11,10 +11,10 @@ class Extract
 {
     private Element $target;
     private array $data;
-    private ?array $entities;
-    private ?array $embeddable;
+    private array $entities;
+    private array $embeddable;
 
-    private function __construct(Element $target, array $data, ?array $entities = null, ?array $embeddable = null)
+    private function __construct(Element $target, array $data, array $entities = [], array $embeddable = [])
     {
         $this->target = $target;
         $this->data = $data;
@@ -28,15 +28,15 @@ class Extract
     }
 
     #[Pure]
-    public static function ofAggregateRoot(array $data, ?array $entities = null, ?array $embeddable = null): self
+    public static function ofAggregateRoot(array $data, array $entities = [], array $embeddable = []): self
     {
         return new self(Element::AggregateRoot, $data, $entities, $embeddable);
     }
 
     #[Pure]
-    public static function ofEntity(array $data, ?array $embeddable = null): self
+    public static function ofEntity(array $data, array $embeddable = []): self
     {
-        return new self(Element::Entity, $data, null, $embeddable);
+        return new self(Element::Entity, $data, [], $embeddable);
     }
 
     #[Pure]
