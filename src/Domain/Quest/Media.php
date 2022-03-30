@@ -22,6 +22,11 @@ class Media
         $this->createdAt = new DateTimeImmutable();
     }
 
+    public function rename(string $newName): string
+    {
+        return $this->name = $newName;
+    }
+
     public function id(): UuidInterface
     {
         return $this->id;

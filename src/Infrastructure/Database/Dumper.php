@@ -112,16 +112,25 @@ class Dumper
      * @param EntitySpecification[] $specifications
      * @return array
      */
-    private function dehydrateAllEntities(array $entities, array $specifications, int|string $aggregateRootPrimaryKeyValue): array
+    private function dehydrateAllEntities(array $entities, array $specifications, int|string $referencedFieldValue): array
     {
         $records = [];
         foreach ($specifications as $specification) {
             $mapper = $this->mappers->entityMapper($specification->className());
             $entityClassName = $specification->className();
-            $aggregateRootIdField = [$specification->referencedField() => $aggregateRootPrimaryKeyValue];
+            $referencedField = [$specification->referencedField() => $referencedFieldValue];
+
             $records[$entityClassName] = match (true) {
-                $specification instanceof SingleEntitySpecification => $this->dehydrateSingleEntity($mapper, $entities[$entityClassName], $aggregateRootIdField),
-                $specification instanceof PluralEntitySpecification => $this->dehydrateMultipleEntities($mapper, $entities[$entityClassName], $aggregateRootIdField),
+                $specification instanceof SingleEntitySpecification => $this->dehydrateSingleEntity(
+                    $mapper,
+                    $entities[$entityClassName],
+                    $referencedField
+                ),
+                $specification instanceof PluralEntitySpecification => $this->dehydrateMultipleEntities(
+                    $mapper,
+                    $entities[$entityClassName],
+                    $referencedField
+                ),
                 default => throw new InvalidArgumentException(sprintf('Unexpected entity specification class %s', get_class($specification))),
             };
         }
@@ -129,23 +138,23 @@ class Dumper
         return $records;
     }
 
-    private function dehydrateSingleEntity(PrimaryMapper $mapper, ?object $entity, array $aggregateRootIdField): ?Record
+    private function dehydrateSingleEntity(PrimaryMapper $mapper, ?object $entity, array $referencedField): ?Record
     {
         if ($entity === null) {
             return null;
         }
 
-        return $this->dehydrateEntity($mapper, $entity, $aggregateRootIdField);
+        return $this->dehydrateEntity($mapper, $entity, $referencedField);
     }
 
     /**
      * @param object[] $entities
      * @return Record[]
      */
-    private function dehydrateMultipleEntities(PrimaryMapper $mapper, array $entities, array $aggregateRootIdField): array
+    private function dehydrateMultipleEntities(PrimaryMapper $mapper, array $entities, array $referencedField): array
     {
         return array_map(
-            fn(object $entity): object => $this->dehydrateEntity($mapper, $entity, $aggregateRootIdField),
+            fn(object $entity): object => $this->dehydrateEntity($mapper, $entity, $referencedField),
             $entities
         );
     }
@@ -155,7 +164,7 @@ class Dumper
      * @param object $entity
      * @return Record
      */
-    private function dehydrateEntity(PrimaryMapper $mapper, object $entity, array $aggregateRootIdField): Record
+    private function dehydrateEntity(PrimaryMapper $mapper, object $entity, array $referencedField): Record
     {
         $extract = $mapper->dehydrate($entity);
 
@@ -168,7 +177,7 @@ class Dumper
 
         $aggregateRootRecordData = $extract->data()
             + $this->dehydrateEmbeddableData($embeddableList, $embeddableSpecifications)
-            + $aggregateRootIdField;
+            + $referencedField;
 
         return $entity instanceof Augmentation
             ? Record::previouslyLoaded($aggregateRootRecordData, $entity->stateHash())

@@ -13,7 +13,7 @@ abstract class AbstractEntityMapper implements PrimaryMapper
     {
         $object = $this->instantiateAugmentedObject($stateHash);
 
-        Closure::bind($this->hydrationClosure(), $object, $object)($extract);
+        $this->hydrationClosure()->bindTo($object, $this->applicableFor())($extract);
 
         return $object;
     }

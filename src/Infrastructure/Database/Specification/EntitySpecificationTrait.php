@@ -3,20 +3,30 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Specification;
 
+use JetBrains\PhpStorm\Pure;
+
 trait EntitySpecificationTrait
 {
     private string $className;
-    private string $tableName;
+    private string $table;
+    private string $primaryKeyField;
     private string $referencedField;
 
     /**
      * @param class-string $className
      */
-    public function __construct(string $className, string $tableName, string $referencedField)
+    public function __construct(string $className, string $table, string $primaryKeyField, string $referencedField)
     {
         $this->className = $className;
-        $this->tableName = $tableName;
+        $this->table = $table;
+        $this->primaryKeyField = $primaryKeyField;
         $this->referencedField = $referencedField;
+    }
+
+    #[Pure]
+    public static function prevalent (string $className, string $table, string $referencedField): self
+    {
+        return new self($className, $table, 'id', $referencedField);
     }
 
     /**
@@ -27,9 +37,14 @@ trait EntitySpecificationTrait
         return $this->className;
     }
 
-    public function tableName(): string
+    public function table(): string
     {
-        return $this->tableName;
+        return $this->table;
+    }
+
+    public function primaryKeyField(): string
+    {
+        return $this->primaryKeyField;
     }
 
     public function referencedField(): string

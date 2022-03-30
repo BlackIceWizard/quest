@@ -10,7 +10,7 @@ interface EntitySpecification
      */
     public function className(): string;
 
-    public function tableName(): string;
+    public function table(): string;
 
     public function referencedField();
 }

@@ -15,8 +15,8 @@ final class QuestRepository extends Repository
     #[Pure]
     protected function specification(): AggregateRootSpecification
     {
-        return new AggregateRootSpecification(Quest::class, 'quests', 'id', [
-            new PluralEntitySpecification(Media::class, 'quest_media', 'quest_id'),
+        return AggregateRootSpecification::prevalent(Quest::class, 'quests', [
+            PluralEntitySpecification::prevalent(Media::class, 'quest_media', 'quest_id'),
         ]);
     }
 

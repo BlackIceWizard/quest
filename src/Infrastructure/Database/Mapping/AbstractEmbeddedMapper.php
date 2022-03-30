@@ -13,7 +13,7 @@ abstract class AbstractEmbeddedMapper implements EmbeddedMapper
     {
         $object = $this->instantiateAsIs();
 
-        Closure::bind($this->hydrationClosure(), $object, $object)($extract);
+        $this->hydrationClosure()->bindTo($object, $this->applicableFor())($extract);
 
         return $object;
     }

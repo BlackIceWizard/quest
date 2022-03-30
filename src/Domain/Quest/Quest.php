@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Domain\Quest;
 
 use DateTimeImmutable;
-use Ramsey\Uuid\UuidInterface;
 
 class Quest
 {
@@ -24,6 +23,11 @@ class Quest
         $this->createdAt = new DateTimeImmutable();
     }
 
+    public function rename(string $newName): string
+    {
+        return $this->name = $newName;
+    }
+
     public function addMedia(Media... $media) {
         array_push($this->media, ...$media);
     }
@@ -36,6 +40,14 @@ class Quest
     public function name(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return Media[]
+     */
+    public function media(): array
+    {
+        return $this->media;
     }
 
     public function createdAt(): DateTimeImmutable

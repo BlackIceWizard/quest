@@ -54,12 +54,12 @@ abstract class Repository
             $entities[$specification->className()] = match (true) {
                 $specification instanceof SingleEntitySpecification => $this->driver->findEntity(
                     $aggregateRootId,
-                    $specification->tableName(),
+                    $specification->table(),
                     $specification->referencedField()
                 ),
                 $specification instanceof PluralEntitySpecification => $this->driver->findEntitySet(
                     $aggregateRootId,
-                    $specification->tableName(),
+                    $specification->table(),
                     $specification->referencedField()
                 ),
                 default => throw new InvalidArgumentException(sprintf('Unexpected entity specification class %s', get_class($specification))),
@@ -114,14 +114,29 @@ abstract class Repository
         );
     }
 
-
     public function store(object $aggregateRoot): void
     {
-        $rawData = $this->dumper->dump($this->specification(), $aggregateRoot);
+        $aggregateRootSpecification = $this->specification();
+        $rawData = $this->dumper->dump($aggregateRootSpecification, $aggregateRoot);
 
-        var_export($rawData);
-        exit;
+        $this->driver->transactional(function () use ($rawData, $aggregateRootSpecification) {
+            $this->driver->store($aggregateRootSpecification->table(), $aggregateRootSpecification->primaryKeyField(), $rawData->byClassname($aggregateRootSpecification->className()));
 
-        $this->driver->store($rawData);
+            foreach ($aggregateRootSpecification->entitySpecifications() as $entitySpecification) {
+                $entityClassName = $entitySpecification->className();
+                switch (true) {
+                    case $entitySpecification instanceof SingleEntitySpecification:
+                        $this->driver->store($entitySpecification->table(), $entitySpecification->primaryKeyField(), $rawData->byClassname($entityClassName));
+                        break;
+                    case $entitySpecification instanceof PluralEntitySpecification:
+                        foreach ($rawData->byClassname($entityClassName) as $entityRecord) {
+                            $this->driver->store($entitySpecification->table(), $entitySpecification->primaryKeyField(), $entityRecord);
+                        }
+                        break;
+                    default:
+                        throw new InvalidArgumentException(sprintf('Unexpected entity specification class %s', get_class($entitySpecification)));
+                }
+            }
+        });
     }
 }

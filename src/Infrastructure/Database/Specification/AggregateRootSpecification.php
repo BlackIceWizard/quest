@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Specification;
 
+use JetBrains\PhpStorm\Pure;
+
 final class AggregateRootSpecification
 {
     private string $className;
@@ -20,6 +22,12 @@ final class AggregateRootSpecification
         $this->table = $table;
         $this->primaryKeyField = $primaryKeyField;
         $this->entitySpecifications = $entitySpecifications;
+    }
+
+    #[Pure]
+    public static function prevalent (string $className, string $table, array $entitySpecifications = []): self
+    {
+        return new self($className, $table, 'id', $entitySpecifications);
     }
 
     /**

@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace RiverRing\Quest\Infrastructure\Database\Dbal\Driver;
 
+use Exception;
 use Iterator;
 use JetBrains\PhpStorm\Pure;
 use PDO;
 use RiverRing\Quest\Infrastructure\Database\PdoProvider;
+use RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation\Record;
+use RiverRing\Quest\Infrastructure\Database\Repository\DbRepresentation\RecordStatus;
 
 class PostgresDriver implements Driver
 {
@@ -68,37 +71,67 @@ class PostgresDriver implements Driver
         );
     }
 
-    public function store(array $data) {
+    public function transactional(callable $operation): void
+    {
+        $this->pdo->beginTransaction();
 
+        try {
+            $operation();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+
+            throw $e;
+        }
+
+        $this->pdo->commit();
     }
 
-    /*
-     public function store(Quest $quest): void
+    public function store(string $table, string $primaryKeyField, Record $record): void
     {
-        $data = $this->dump($quest);
+        switch ($record->status()) {
+            case RecordStatus::New:
+                $this->addNew($table, $record->data());
+                break;
+            case RecordStatus::Changed:
+                $this->updateExisting($table, $primaryKeyField, $record->data());
+                break;
+        }
+    }
 
-        $questData = $data[Quest::class];
-
-        $this->driver->execute(
+    private function addNew(string $table, array $fields): void
+    {
+        $this->execute(
             sprintf(
-                'INSERT INTO quests (%s)
-        VALUES(%s)
-        ON CONFLICT (id)
-        DO
-            UPDATE SET email = EXCLUDED.email ||',
-                $this->formatFieldNamesToStore($questData),
-                $this->formatPlaceholdersToStore($questData)
+                'INSERT INTO "%s" (%s) VALUES (%s)',
+                $table,
+                $this->formatFieldNamesToStore($fields),
+                $this->formatPlaceholdersToStore($fields)
             ),
-            $questData
+            $fields
         );
     }
 
-    private function formatFieldNamesToStore(mixed $questData): string
+    private function updateExisting(string $table, string $primaryKeyField, array $fields): void
+    {
+        $this->execute(
+            sprintf(
+                'UPDATE "%s" SET (%s) = (%s) WHERE "%s" = :%s_2',
+                $table,
+                $this->formatFieldNamesToStore($fields),
+                $this->formatPlaceholdersToStore($fields),
+                $primaryKeyField,
+                $primaryKeyField
+            ),
+            $fields + [$primaryKeyField . '_2' => $fields[$primaryKeyField]]
+        );
+    }
+
+    private function formatFieldNamesToStore(array $questData): string
     {
         return implode(
             ', ',
             array_map(
-                fn(string $key) => "'" . $key . "'",
+                fn(string $key) => '"' . $key . '"',
                 array_keys($questData)
             )
         );
@@ -114,5 +147,4 @@ class PostgresDriver implements Driver
             )
         );
     }
-    */
 }

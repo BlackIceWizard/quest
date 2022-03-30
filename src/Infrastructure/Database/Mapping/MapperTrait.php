@@ -17,7 +17,7 @@ trait MapperTrait
 
     public function dehydrate(object $object): Extract
     {
-        return Closure::bind($this->dehydrationClosure(), $object, $object)();
+        return $this->dehydrationClosure()->bindTo($object, $this->applicableFor())();
     }
 
     private function instantiateAsIs(): object
@@ -30,7 +30,6 @@ trait MapperTrait
 
     private function instantiateAugmentedObject(string $stateHash): object
     {
-        $objectClassName = $this->applicableFor();
         $this->checkObjectClass();
 
         $instantiateExpression = sprintf(
@@ -38,7 +37,7 @@ trait MapperTrait
             . 'public function __construct(){}'
             . 'public function stateHash(): string { return \'%s\'; }'
             . '};',
-            $objectClassName,
+            $this->applicableFor(),
             Augmentation::class,
             $stateHash
         );
