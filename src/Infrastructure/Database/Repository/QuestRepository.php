@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Infrastructure\Database\Repository;
 
 use JetBrains\PhpStorm\Pure;
+use RiverRing\OwlOrm\Repository\Repository;
+use RiverRing\OwlOrm\Specification\AggregateRootSpecification;
+use RiverRing\OwlOrm\Specification\PluralEntitySpecification;
 use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
-use RiverRing\Quest\Infrastructure\Database\Specification\AggregateRootSpecification;
-use RiverRing\Quest\Infrastructure\Database\Specification\PluralEntitySpecification;
 
 final class QuestRepository extends Repository
 {

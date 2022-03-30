@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Infrastructure\Database\Mapping\Quest;
 
 use Closure;
+use RiverRing\OwlOrm\Mapping\AbstractAggregateRootMapper;
+use RiverRing\OwlOrm\Mapping\Extract;
 use RiverRing\Quest\Domain\Quest\Media;
 use RiverRing\Quest\Domain\Quest\Quest;
 use RiverRing\Quest\Domain\Quest\QuestId;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractAggregateRootMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\Extract;
 use RiverRing\Quest\Infrastructure\Database\Mapping\Property\DateTimeType;
 
 final class QuestMapper extends AbstractAggregateRootMapper

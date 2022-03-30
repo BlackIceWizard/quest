@@ -14,7 +14,8 @@ services:
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     RiverRing\Quest\:
-        resource: '../src/'
+        resource:
+            '../src/'
         exclude:
             - '../src/Bridge/Symfony/Kernel.php'
             - '../src/Domain/Model/'
@@ -25,7 +26,7 @@ services:
         resource: '../src/Bridge/Symfony/Controller/'
         tags: ['controller.service_arguments']
 
-    RiverRing\Quest\Infrastructure\Database\PdoProvider:
+    RiverRing\OwlOrm\PdoProvider:
         arguments:
             $host: '%env(resolve:POSTGRES_HOST)%'
             $port: '%env(resolve:POSTGRES_PORT)%'
@@ -34,16 +35,13 @@ services:
             $pass: '%env(resolve:POSTGRES_PASSWORD)%'
 
     _instanceof:
-        RiverRing\Quest\Infrastructure\Database\Mapping\Mapper:
+        RiverRing\OwlOrm\Mapping\Mapper:
             tags: [ 'app.mappers' ]
 
-    RiverRing\Quest\Infrastructure\Database\Repository\QuestRepository:
-        public: true
-
-    RiverRing\Quest\Infrastructure\Database\Mapping\MapperRegistry:
+    RiverRing\OwlOrm\Mapping\MapperRegistry:
         arguments:
             $mappers: !tagged_iterator 'app.mappers'
 
-    RiverRing\Quest\Infrastructure\Database\Dbal\Driver\PostgresDriver: ~
+    RiverRing\OwlOrm\Dbal\Driver\PostgresDriver: ~
 
-    RiverRing\Quest\Infrastructure\Database\Dbal\Driver\Driver: '@RiverRing\Quest\Infrastructure\Database\Dbal\Driver\PostgresDriver'
+    RiverRing\OwlOrm\Dbal\Driver\Driver: '@RiverRing\OwlOrm\Dbal\Driver\PostgresDriver'

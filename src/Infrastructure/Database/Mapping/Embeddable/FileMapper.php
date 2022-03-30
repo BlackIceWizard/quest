@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace RiverRing\Quest\Infrastructure\Database\Mapping\Embeddable;
 
 use Closure;
+use RiverRing\OwlOrm\Mapping\AbstractEmbeddedMapper;
+use RiverRing\OwlOrm\Mapping\Extract;
 use RiverRing\Quest\Domain\File;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEmbeddedMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\Extract;
 
 final class FileMapper extends AbstractEmbeddedMapper
 {

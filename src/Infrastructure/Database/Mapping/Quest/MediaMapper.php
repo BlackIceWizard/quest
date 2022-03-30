@@ -5,13 +5,13 @@ namespace RiverRing\Quest\Infrastructure\Database\Mapping\Quest;
 
 use Closure;
 use JetBrains\PhpStorm\Pure;
+use RiverRing\OwlOrm\Mapping\AbstractEntityMapper;
+use RiverRing\OwlOrm\Mapping\Extract;
+use RiverRing\OwlOrm\Specification\EmbeddableSpecification;
 use Ramsey\Uuid\Uuid;
 use RiverRing\Quest\Domain\File;
 use RiverRing\Quest\Domain\Quest\Media;
-use RiverRing\Quest\Infrastructure\Database\Mapping\AbstractEntityMapper;
-use RiverRing\Quest\Infrastructure\Database\Mapping\Extract;
 use RiverRing\Quest\Infrastructure\Database\Mapping\Property\DateTimeType;
-use RiverRing\Quest\Infrastructure\Database\Specification\EmbeddableSpecification;
 
 final class MediaMapper extends AbstractEntityMapper
 {
