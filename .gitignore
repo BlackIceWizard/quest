@@ -28,3 +28,8 @@
 
 # Storage
 /.docker/storage
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###

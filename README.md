@@ -1,3 +1,5 @@
+>docker compose exec -w/var/www/html/OwlOrm php composer phpunit
+
 # RiverRing/OwlOrm play ground
 
 RiverRing/OwlOrm: https://packagist.org/packages/river-ring/owl-orm

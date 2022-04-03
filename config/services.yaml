@@ -26,13 +26,16 @@ services:
         resource: '../src/Bridge/Symfony/Controller/'
         tags: ['controller.service_arguments']
 
-    RiverRing\OwlOrm\PdoProvider:
+    RiverRing\OwlOrm\Dbal\Pdo\LazyPdoProvider:
         arguments:
-            $host: '%env(resolve:POSTGRES_HOST)%'
-            $port: '%env(resolve:POSTGRES_PORT)%'
-            $db: '%env(resolve:POSTGRES_DB)%'
+            $dsn: 'pgsql:host=%env(resolve:POSTGRES_HOST)%;port=%env(resolve:POSTGRES_PORT)%;dbname=%env(resolve:POSTGRES_DB)%'
             $user: '%env(resolve:POSTGRES_USER)%'
             $pass: '%env(resolve:POSTGRES_PASSWORD)%'
+
+    RiverRing\OwlOrm\Dbal\Pdo\PdoProvider: '@RiverRing\OwlOrm\Dbal\Pdo\LazyPdoProvider'
+
+    RiverRing\OwlOrm\Dbal\Pdo\GeneralPdoFactory: ~
+    RiverRing\OwlOrm\Dbal\Pdo\PdoFactory: '@RiverRing\OwlOrm\Dbal\Pdo\GeneralPdoFactory'
 
     _instanceof:
         RiverRing\OwlOrm\Mapping\Mapper:
